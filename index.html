@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>タイピング・アーケード｜中2英語</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;700&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12132B;
+    --bg2:#0C0D22;
+    --surface:#1E2148;
+    --surface2:#262a5a;
+    --ink:#EDEEFF;
+    --muted:#8A8FC7;
+    --correct:#4ADE9E;
+    --active:#FFCB47;
+    --wrong:#FF6B8A;
+    --accent:#7C6FF0;
+    --accent2:#57C7FF;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:radial-gradient(120% 80% at 50% -10%, #21255a 0%, var(--bg) 45%, var(--bg2) 100%);
+    color:var(--ink);
+    font-family:"Zen Maru Gothic","Space Grotesk",sans-serif;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    overflow-x:hidden;
+  }
+  .wrap{
+    width:100%;
+    max-width:520px;
+    margin:0 auto;
+    padding:16px 16px 24px;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+  .brand{font-family:"Space Grotesk";font-weight:700;font-size:19px;letter-spacing:.02em;display:flex;align-items:center;gap:8px;}
+  .brand .dot{width:11px;height:11px;border-radius:3px;background:var(--active);box-shadow:0 0 12px var(--active);}
+  .iconbtn{
+    background:var(--surface);border:1px solid #33386f;color:var(--muted);
+    width:40px;height:40px;border-radius:12px;font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .iconbtn:active{transform:scale(.94);}
+
+  /* ---------- start screen ---------- */
+  .screen{flex:1;display:flex;flex-direction:column;}
+  .hero{
+    text-align:center;margin:6px 0 22px;
+  }
+  .hero h1{
+    font-family:"Space Grotesk";font-weight:700;font-size:34px;line-height:1.12;margin:0 0 8px;
+    letter-spacing:.01em;
+  }
+  .hero h1 .lit{color:var(--active);text-shadow:0 0 18px rgba(255,203,71,.5);}
+  .hero p{color:var(--muted);font-size:14px;margin:0;}
+  .demo-tiles{display:flex;justify-content:center;gap:5px;margin:20px 0 8px;flex-wrap:wrap;}
+  .label-row{color:var(--muted);font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:8px 2px 10px;font-family:"Space Grotesk";}
+
+  .levels{display:flex;flex-direction:column;gap:12px;}
+  .level-card{
+    text-align:left;background:var(--surface);border:1px solid #333a72;border-radius:18px;
+    padding:16px 16px;cursor:pointer;color:var(--ink);width:100%;
+    display:flex;align-items:center;gap:14px;transition:border-color .15s,transform .1s,background .15s;
+    font-family:inherit;
+  }
+  .level-card:active{transform:scale(.985);}
+  .level-card:hover{border-color:var(--accent);background:var(--surface2);}
+  .level-card .num{
+    font-family:"Space Grotesk";font-weight:700;font-size:20px;
+    width:44px;height:44px;flex:none;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(140deg,var(--accent),#5b4fd0);box-shadow:0 6px 16px rgba(124,111,240,.35);
+  }
+  .level-card.all .num{background:linear-gradient(140deg,var(--active),#f7a83a);color:#2a1c00;box-shadow:0 6px 16px rgba(255,203,71,.3);}
+  .level-card .meta{flex:1;min-width:0;}
+  .level-card .meta .t{font-weight:700;font-size:16px;margin-bottom:2px;}
+  .level-card .meta .s{color:var(--muted);font-size:12.5px;}
+  .level-card .arrow{color:var(--muted);font-size:20px;}
+
+  .settings{margin-top:20px;background:var(--surface);border:1px solid #333a72;border-radius:16px;padding:4px 16px;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;}
+  .toggle-row .tt{font-size:14px;font-weight:500;}
+  .toggle-row .tt small{display:block;color:var(--muted);font-size:11.5px;font-weight:500;margin-top:2px;}
+  .switch{position:relative;width:50px;height:29px;flex:none;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:#3a3f78;border-radius:20px;cursor:pointer;transition:background .18s;}
+  .slider::before{content:"";position:absolute;width:23px;height:23px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .18s;}
+  .switch input:checked + .slider{background:var(--correct);}
+  .switch input:checked + .slider::before{transform:translateX(21px);}
+
+  .segment{display:flex;gap:4px;background:#161a3c;border:1px solid #333a72;border-radius:11px;padding:3px;}
+  .segment button{font-family:"Space Grotesk";font-weight:700;font-size:14px;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:7px 13px;cursor:pointer;}
+  .segment button.on{background:var(--accent);color:#fff;}
+
+  /* ---------- play screen ---------- */
+  .timebar-wrap{margin-bottom:14px;}
+  .time-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;}
+  .time-label{font-family:"Space Grotesk";font-weight:700;font-size:11px;letter-spacing:.14em;color:var(--muted);}
+  .time-num{font-family:"Space Grotesk";font-weight:700;font-size:26px;line-height:1;}
+  .time-num.low{color:var(--wrong);animation:blink .6s steps(2,start) infinite;}
+  @keyframes blink{50%{opacity:.35;}}
+  .progress-fill.time{background:linear-gradient(90deg,var(--correct),var(--accent2));transition:width .12s linear;}
+  .progress-fill.time.low{background:linear-gradient(90deg,#ff5470,var(--wrong));}
+  .hud{display:flex;gap:8px;margin-bottom:14px;}
+  .hud .cell{flex:1;background:var(--surface);border:1px solid #2f356b;border-radius:13px;padding:8px 6px;text-align:center;}
+  .hud .cell .k{color:var(--muted);font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:"Space Grotesk";}
+  .hud .cell .v{font-family:"Space Grotesk";font-weight:700;font-size:18px;margin-top:1px;}
+  #comboCell .v{color:var(--active);}
+
+  .progress-track{height:7px;background:var(--surface);border-radius:6px;overflow:hidden;margin-bottom:18px;border:1px solid #2f356b;}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:6px;transition:width .35s ease;}
+
+  .jp-hint{
+    text-align:center;font-size:16px;font-weight:700;color:#cdd0ff;margin:4px 0 4px;line-height:1.5;
+  }
+  .tag{
+    display:inline-block;font-size:11px;font-weight:700;color:var(--accent2);
+    background:rgba(87,199,255,.12);border:1px solid rgba(87,199,255,.3);
+    padding:2px 10px;border-radius:20px;margin-bottom:14px;font-family:"Space Grotesk";letter-spacing:.03em;
+  }
+
+  .tiles{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:5px;
+    margin:6px 0 20px;min-height:52px;
+  }
+  .tile{
+    font-family:"JetBrains Mono",monospace;font-weight:700;font-size:22px;line-height:1;
+    min-width:26px;height:42px;padding:0 3px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--surface);border:1px solid #363c74;color:#b9bdf0;
+    transition:background .12s,color .12s,border-color .12s,transform .12s;
+  }
+  .tile.space{min-width:16px;background:transparent;border:none;border-bottom:2px solid #3a4079;border-radius:0;height:42px;}
+  .tile.done{background:rgba(74,222,158,.16);border-color:var(--correct);color:var(--correct);}
+  .tile.space.done{background:transparent;border-bottom-color:var(--correct);}
+  .tile.bad{background:rgba(255,107,138,.18);border-color:var(--wrong);color:var(--wrong);}
+  .tile.space.bad{background:transparent;border-bottom-color:var(--wrong);}
+  .tile.active{border-color:var(--active);color:var(--active);box-shadow:0 0 0 2px rgba(255,203,71,.28);animation:pulse 1s ease-in-out infinite;}
+  .tile.pop{animation:pop .18s ease;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 2px rgba(255,203,71,.28);}50%{box-shadow:0 0 0 5px rgba(255,203,71,.12);}}
+  @keyframes pop{0%{transform:scale(1);}45%{transform:scale(1.18);}100%{transform:scale(1);}}
+
+  .type-line{position:relative;}
+  #typeInput{
+    width:100%;font-family:"JetBrains Mono",monospace;font-size:18px;font-weight:500;
+    background:var(--surface);border:2px solid #3a4079;border-radius:14px;
+    color:var(--ink);padding:15px 16px;outline:none;text-align:center;
+    letter-spacing:.04em;transition:border-color .15s;
+  }
+  #typeInput:focus{border-color:var(--accent);}
+  #typeInput.shake{animation:shake .28s;border-color:var(--wrong);}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+  .caret-hint{text-align:center;color:var(--muted);font-size:12px;margin-top:10px;}
+
+  .play-foot{display:flex;gap:10px;margin-top:auto;padding-top:18px;}
+  .btn{
+    flex:1;font-family:"Space Grotesk";font-weight:700;font-size:15px;
+    border-radius:14px;padding:14px;border:none;cursor:pointer;color:var(--ink);
+  }
+  .btn:active{transform:scale(.97);}
+  .btn.ghost{background:var(--surface);border:1px solid #3a4079;color:var(--muted);}
+  .btn.primary{background:linear-gradient(140deg,var(--accent),#5b4fd0);box-shadow:0 6px 16px rgba(124,111,240,.35);}
+
+  /* score popup */
+  #scorePop{
+    position:fixed;left:50%;top:38%;transform:translateX(-50%);pointer-events:none;
+    font-family:"Space Grotesk";font-weight:700;font-size:30px;color:var(--correct);
+    opacity:0;text-shadow:0 3px 20px rgba(74,222,158,.5);z-index:50;
+  }
+  #scorePop .pop-sub{font-size:15px;color:var(--active);margin-top:2px;text-shadow:0 2px 12px rgba(255,203,71,.5);}
+  #scorePop.go{animation:rise 900ms ease forwards;}
+  @keyframes rise{0%{opacity:0;transform:translate(-50%,10px) scale(.7);}25%{opacity:1;transform:translate(-50%,-6px) scale(1.05);}100%{opacity:0;transform:translate(-50%,-46px) scale(1);}}
+
+  /* ---------- result screen ---------- */
+  .result{text-align:center;display:flex;flex-direction:column;align-items:center;}
+  .stars{font-size:40px;letter-spacing:6px;margin:10px 0 6px;}
+  .star-off{color:#3a4079;}
+  .star-on{color:var(--active);text-shadow:0 0 16px rgba(255,203,71,.55);}
+  .result h2{font-family:"Space Grotesk";font-weight:700;font-size:26px;margin:6px 0 2px;}
+  .result .msg{color:#cdd0ff;font-size:15px;font-weight:700;margin-bottom:22px;}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-bottom:24px;}
+  .stat-box{background:var(--surface);border:1px solid #333a72;border-radius:16px;padding:16px 12px;}
+  .stat-box .bk{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:"Space Grotesk";}
+  .stat-box .bv{font-family:"Space Grotesk";font-weight:700;font-size:30px;margin-top:4px;}
+  .stat-box .bv small{font-size:14px;color:var(--muted);font-weight:600;}
+
+  .stat-box.wide{grid-column:1 / -1;}
+
+  /* home admin link */
+  .home-admin{display:flex;justify-content:center;margin-top:20px;}
+  .home-admin button{background:none;border:none;color:var(--muted);font-family:"Zen Maru Gothic";font-size:13px;font-weight:700;cursor:pointer;padding:10px;}
+  .home-admin button:active{opacity:.6;}
+
+  /* quiz */
+  .quiz-head{text-align:center;margin-bottom:8px;}
+  .quiz-head .qk{font-family:"Space Grotesk";font-weight:700;font-size:11px;letter-spacing:.14em;color:var(--accent2);text-transform:uppercase;}
+  .quiz-head h2{font-family:"Space Grotesk";font-weight:700;font-size:23px;margin:6px 0 0;}
+  .quiz-prog{color:var(--muted);font-size:13px;font-weight:700;margin-bottom:18px;text-align:center;}
+  .quiz-word{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:28px;text-align:center;background:var(--surface);border:1px solid #363c74;border-radius:16px;padding:24px 16px;margin-bottom:6px;word-break:break-word;line-height:1.3;}
+  .quiz-ask{text-align:center;color:var(--muted);font-size:13px;font-weight:700;margin-bottom:16px;}
+  .quiz-opts{display:flex;flex-direction:column;gap:11px;}
+  .opt{text-align:left;background:var(--surface);border:2px solid #363c74;border-radius:14px;padding:15px 16px;font-family:"Zen Maru Gothic";font-weight:700;font-size:16px;color:var(--ink);cursor:pointer;width:100%;transition:border-color .12s,background .12s;line-height:1.4;}
+  .opt:active{transform:scale(.99);}
+  .opt.correct{border-color:var(--correct);background:rgba(74,222,158,.16);color:var(--correct);}
+  .opt.wrong{border-color:var(--wrong);background:rgba(255,107,138,.16);color:var(--wrong);}
+
+  /* admin */
+  .admin h2{font-family:"Space Grotesk";font-weight:700;font-size:22px;margin:2px 0 16px;text-align:center;}
+  .admin .big-days{text-align:center;background:linear-gradient(150deg,#26306a,#1b1f47);border:1px solid #3a4079;border-radius:18px;padding:18px;margin-bottom:12px;}
+  .admin .big-days .n{font-family:"Space Grotesk";font-weight:700;font-size:46px;line-height:1;}
+  .admin .big-days .n small{font-size:19px;color:var(--muted);}
+  .admin .cap{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:"Space Grotesk";margin-bottom:6px;}
+  .admin .pay-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid #333a72;border-radius:14px;padding:12px 16px;margin-bottom:12px;}
+  .admin .pay-row label{font-size:14px;font-weight:700;white-space:nowrap;}
+  .admin .pay-row input{flex:1;min-width:0;background:#12142f;border:1px solid #3a4079;border-radius:10px;color:var(--ink);font-family:"Space Grotesk";font-weight:700;font-size:18px;padding:10px 12px;text-align:right;}
+  .admin .total{text-align:center;background:var(--surface);border:1px solid #333a72;border-radius:14px;padding:14px;margin-bottom:14px;}
+  .admin .total .amt{font-family:"Space Grotesk";font-weight:700;font-size:36px;color:var(--active);margin-top:2px;}
+  .admin .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .admin .mini{background:var(--surface);border:1px solid #333a72;border-radius:12px;padding:12px;text-align:center;}
+  .admin .mini .mk{color:var(--muted);font-size:10.5px;font-weight:700;font-family:"Space Grotesk";letter-spacing:.06em;text-transform:uppercase;}
+  .admin .mini .mv{font-family:"Space Grotesk";font-weight:700;font-size:22px;margin-top:2px;}
+  .admin .dates{background:var(--surface);border:1px solid #333a72;border-radius:12px;padding:12px 14px;margin-bottom:12px;max-height:120px;overflow:auto;}
+  .admin .dates ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px;}
+  .admin .dates li{background:#12142f;border:1px solid #333a72;border-radius:8px;padding:4px 9px;font-size:12px;font-weight:700;color:#cdd0ff;}
+  .admin .note{color:var(--muted);font-size:11.5px;text-align:center;margin-bottom:14px;line-height:1.55;}
+  .admin .adm-btns{display:flex;gap:10px;}
+  .mode-pick{display:flex;gap:8px;margin-bottom:16px;}
+  .mode-pick button{flex:1;font-family:"Zen Maru Gothic";font-weight:700;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid #3a4079;border-radius:11px;padding:11px 4px;cursor:pointer;}
+  .mode-pick button:active{transform:scale(.96);}
+
+  /* next-mode panel (start screen) */
+  .nm-track{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .nm-step{font-family:"Space Grotesk";font-weight:700;font-size:13px;color:var(--muted);background:var(--surface);border:1px solid #333a72;border-radius:20px;padding:6px 13px;}
+  .nm-step.cur{color:#2a1c00;background:var(--active);border-color:var(--active);box-shadow:0 4px 14px rgba(255,203,71,.3);}
+  .nm-arrow{color:var(--muted);font-size:13px;}
+  .next-mode{text-align:center;background:linear-gradient(150deg,#2a2f66,#1b1f47);border:1px solid #3a4079;border-radius:20px;padding:24px 18px;margin-bottom:14px;}
+  .nm-cap{color:var(--accent2);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-family:"Space Grotesk";margin-bottom:8px;}
+  .nm-name{font-family:"Space Grotesk";font-weight:700;font-size:40px;line-height:1;margin-bottom:8px;}
+  .nm-desc{color:#cdd0ff;font-size:14px;font-weight:700;}
+  .nm-start{width:100%;font-size:18px;padding:16px;margin-bottom:6px;}
+
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(8,9,22,.82);display:flex;align-items:center;justify-content:center;z-index:100;padding:24px;}
+  .modal{background:var(--surface);border:1px solid #3a4079;border-radius:20px;padding:24px 20px;width:100%;max-width:340px;text-align:center;}
+  .modal h3{font-family:"Space Grotesk";font-weight:700;font-size:19px;margin:0 0 6px;}
+  .modal p{color:var(--muted);font-size:13px;margin:0 0 16px;line-height:1.5;}
+  .modal input{width:100%;background:#12142f;border:2px solid #3a4079;border-radius:12px;color:var(--ink);font-family:"Space Grotesk";font-weight:700;font-size:24px;text-align:center;letter-spacing:.3em;padding:14px;margin-bottom:8px;}
+  .modal .err{color:var(--wrong);font-size:13px;font-weight:700;min-height:18px;margin-bottom:8px;}
+  .modal .m-btns{display:flex;gap:10px;}
+
+  .hidden{display:none !important;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+  @media (max-width:360px){
+    .tile{font-size:20px;min-width:23px;height:38px;}
+    .hero h1{font-size:29px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span>タイピング・アーケード</div>
+    <button class="iconbtn" id="muteBtn" aria-label="音のオン・オフ">🔊</button>
+  </div>
+
+  <!-- ===== LOADING / ERROR ===== -->
+  <section class="screen" id="loadScreen">
+    <div class="result" style="justify-content:center;flex:1;">
+      <div id="loadSpinner" style="font-size:40px;margin-bottom:14px;">⏳</div>
+      <h2 id="loadTitle">問題を読み込み中…</h2>
+      <div class="msg" id="loadMsg">スプレッドシートから最新の問題を取得しています</div>
+      <button class="btn primary hidden" id="loadRetryBtn" style="margin-top:20px;max-width:220px;">もう一度試す</button>
+    </div>
+  </section>
+
+  <!-- ===== START ===== -->
+  <section class="screen hidden" id="startScreen">
+    <div class="hero">
+      <h1>お手本を見て<br><span class="lit">そのまま打つ</span>。</h1>
+      <p>中学2年生の英語で、スピードと正確さをきたえよう。</p>
+      <div class="demo-tiles" id="demoTiles"></div>
+    </div>
+
+    <div class="nm-track" id="nmTrack"></div>
+    <div class="next-mode">
+      <div class="nm-cap">つぎのモード</div>
+      <div class="nm-name" id="nmName">単語</div>
+      <div class="nm-desc" id="nmDesc">中2の基本たんご</div>
+    </div>
+    <button class="btn primary nm-start" id="startBtn">スタート ▶</button>
+
+    <div class="settings">
+      <div class="toggle-row">
+        <div class="tt">制限時間（秒）<small>時間内に何問とけるか勝負</small></div>
+        <div class="segment" id="durSeg">
+          <button data-dur="30">30</button>
+          <button data-dur="60" class="on">60</button>
+          <button data-dur="90">90</button>
+        </div>
+      </div>
+      <div class="toggle-row">
+        <div class="tt">大文字も区別する<small>OFFなら i でも I でも正解あつかい</small></div>
+        <label class="switch"><input type="checkbox" id="strictToggle"><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="home-admin">
+      <button id="openAdminBtn">⚙ おうちの人用（管理）</button>
+    </div>
+  </section>
+
+  <!-- ===== PLAY ===== -->
+  <section class="screen hidden" id="playScreen">
+    <div class="timebar-wrap">
+      <div class="time-top"><span class="time-label">TIME</span><span class="time-num" id="timeNum">60</span></div>
+      <div class="progress-track"><div class="progress-fill time" id="timeFill" style="width:100%"></div></div>
+    </div>
+    <div class="hud">
+      <div class="cell"><div class="k">Score</div><div class="v" id="scoreVal">0</div></div>
+      <div class="cell" id="comboCell"><div class="k">Combo</div><div class="v" id="comboVal">0</div></div>
+      <div class="cell"><div class="k">解いた</div><div class="v" id="solvedVal">0</div></div>
+    </div>
+
+    <div style="text-align:center;">
+      <span class="tag hidden" id="grammarTag"></span>
+    </div>
+    <div class="jp-hint" id="jpHint">—</div>
+    <div class="tiles" id="tiles"></div>
+
+    <div class="type-line">
+      <input id="typeInput" type="text" inputmode="text" autocomplete="off" autocorrect="off"
+             autocapitalize="off" spellcheck="false" enterkeyhint="next"
+             placeholder="ここに入力…" aria-label="英文を入力">
+    </div>
+    <div class="caret-hint" id="caretHint">タップして入力をはじめよう</div>
+
+    <div class="play-foot">
+      <button class="btn ghost" id="quitBtn">やめる</button>
+      <button class="btn ghost" id="skipBtn">スキップ ›</button>
+    </div>
+  </section>
+
+  <!-- ===== RESULT ===== -->
+  <section class="screen hidden" id="resultScreen">
+    <div class="result">
+      <div class="stars" id="stars"></div>
+      <h2 id="resultTitle">クリア！</h2>
+      <div class="msg" id="resultMsg"></div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="bk">Score</div><div class="bv" id="rScore">0</div></div>
+        <div class="stat-box"><div class="bk">解いた</div><div class="bv" id="rSolved">0<small> 問</small></div></div>
+        <div class="stat-box"><div class="bk">正確さ</div><div class="bv" id="rAcc">0<small>%</small></div></div>
+        <div class="stat-box"><div class="bk">スピード</div><div class="bv" id="rWpm">0<small> wpm</small></div></div>
+        <div class="stat-box wide"><div class="bk">意味クイズ</div><div class="bv" id="rQuiz">—</div></div>
+      </div>
+      <div class="play-foot" style="width:100%;margin-top:0;">
+        <button class="btn ghost" id="againBtn">もう一度</button>
+        <button class="btn primary" id="homeBtn">ホームへ</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== QUIZ ===== -->
+  <section class="screen hidden" id="quizScreen">
+    <div class="quiz-head">
+      <div class="qk">TIME UP → いみをおぼえよう</div>
+      <h2>意味クイズ</h2>
+    </div>
+    <div class="quiz-prog" id="quizProg"></div>
+    <div class="quiz-word" id="quizWord"></div>
+    <div class="quiz-ask">この意味はどれ？</div>
+    <div class="quiz-opts" id="quizOpts"></div>
+  </section>
+
+  <!-- ===== ADMIN ===== -->
+  <section class="screen hidden" id="adminScreen">
+    <div class="admin">
+      <h2>⚙ おうちの人用</h2>
+      <div class="big-days">
+        <div class="cap">やった日数（累計）</div>
+        <div class="n" id="admDays">0<small> 日</small></div>
+      </div>
+      <div class="pay-row">
+        <label>1日あたり</label>
+        <input id="admYen" type="tel" inputmode="numeric" placeholder="0">
+        <label>円</label>
+      </div>
+      <div class="total">
+        <div class="cap">いまのお小遣い合計</div>
+        <div class="amt" id="admTotal">¥0</div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini"><div class="mk">連続</div><div class="mv" id="admStreak">0日</div></div>
+        <div class="mini"><div class="mk">意味クイズ正答率</div><div class="mv" id="admQuiz">—</div></div>
+      </div>
+      <div class="dates">
+        <div class="cap" style="margin-bottom:8px;">やった日（最近）</div>
+        <ul id="admDates"></ul>
+      </div>
+      <div class="note" id="admNote"></div>
+      <div class="pay-row" style="justify-content:space-between;">
+        <div class="tt" style="font-size:12px;color:var(--muted);">問題データ 最終更新: <span id="admQDataAt">—</span></div>
+        <button class="btn ghost" id="admRefreshBtn" style="flex:none;padding:10px 14px;">⟳ 最新にする</button>
+      </div>
+      <div class="cap" style="margin-bottom:8px;">モードを選んで練習（進行には影響しません）</div>
+      <div class="mode-pick">
+        <button data-level="0">単語</button>
+        <button data-level="1">文章</button>
+        <button data-level="2">文法</button>
+        <button data-level="-1">ぜんぶ</button>
+      </div>
+      <div class="adm-btns">
+        <button class="btn ghost" id="admChangePin">PINを変える</button>
+        <button class="btn primary" id="admBack">もどる</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="scorePop"></div>
+
+<!-- PIN modal -->
+<div class="modal-bg hidden" id="pinModal">
+  <div class="modal">
+    <h3 id="pinTitle">PINを入力</h3>
+    <p id="pinDesc"></p>
+    <input id="pinInput" type="tel" inputmode="numeric" maxlength="4" placeholder="****" aria-label="PIN">
+    <div class="err" id="pinErr"></div>
+    <div class="m-btns">
+      <button class="btn ghost" id="pinCancel">とじる</button>
+      <button class="btn primary" id="pinOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ データ（中2英語） ============
+   スプレッドシートから取得する。中身は下の「リモート問題文の取得」を参照。 */
+let DATA = null;
+
+/* ============ スプレッドシート連携（記録・問題文）============
+   GitHub Pages にアップしたあとで url を設定する。
+   「やった日」記録は url が空でもローカル保存で動くが、
+   問題文（単語・文・文法）の取得には url の設定が必須。 */
+const REMOTE = {
+  url:   "https://script.google.com/macros/s/AKfycbx4BiMSmbdXEDYMr27oj0vejliDp4RrNkGXW91fVxAylfPTTEdhl0XWR45z1xC_RPmY0g/exec",        // ← Apps ScriptのウェブアプリURL（末尾が /exec）をここに貼る
+  token: "",        // ← Apps Script側の TOKEN と同じ文字列（使わないなら空でOK）
+  name:  "child"    // ← 記録につける名前（きょうだいで分けたいときに変える）
+};
+
+/* ============ 状態 ============ */
+let queue=[], idx=0, target="", strict=false, curLevel=0;
+let score=0, combo=0, maxCombo=0, solved=0;
+let sessCorrect=0, sessErrors=0, sessChars=0;
+let itemStart=0, itemErrors=0, lastTypedLen=0, itemStarted=false;
+let duration=60, timeLeft=60, timerId=null, timerRunning=false, gameOver=false, playStartMs=0;
+let soundOn=true, audioCtx=null;
+let seenItems=[];
+let quizList=[], quizIdx=0, quizScore=0;
+
+/* ============ 保存（localStorage） ============ */
+const STORE_KEY="typingGameKidsV1";
+let store={ playedDates:[], perDayYen:0, pin:"", totalSolved:0, quizCorrect:0, quizTotal:0, bestScore:0, modeIndex:0 };
+let storageOK=true;
+let adminLaunch=false;
+const MODES=[
+  {level:0, name:"単語", desc:"中2の基本たんご"},
+  {level:1, name:"文章", desc:"やさしい英文にちょうせん"},
+  {level:2, name:"文法", desc:"過去形・比較・不定詞など"}
+];
+function loadStore(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    if(raw) store=Object.assign(store, JSON.parse(raw));
+    localStorage.setItem(STORE_KEY+"_t","1"); // 書き込みテスト
+  }catch(e){ storageOK=false; }
+}
+function saveStore(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){ storageOK=false; } }
+function fmtDate(d){
+  const m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
+  return d.getFullYear()+"-"+m+"-"+day;
+}
+function recordDay(){
+  const t=fmtDate(new Date());
+  if(!store.playedDates.includes(t)) store.playedDates.push(t);
+}
+function calcStreak(dates){
+  const arr = dates || store.playedDates;
+  const set=new Set(arr);
+  if(set.size===0) return 0;
+  let streak=0, d=new Date();
+  if(!set.has(fmtDate(d))) d.setDate(d.getDate()-1);
+  while(set.has(fmtDate(d))){ streak++; d.setDate(d.getDate()-1); }
+  return streak;
+}
+
+/* ---- オンライン記録（スプレッドシート）---- */
+function recordDayRemote(dateStr){
+  if(!REMOTE.url) return;
+  fetch(REMOTE.url, {
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" }, // 簡易リクエストにしてCORSプリフライトを避ける
+    body: JSON.stringify({ date:dateStr, name:REMOTE.name, token:REMOTE.token })
+  }).catch(()=>{});   // 失敗してもローカルには保存済みなので無視
+}
+async function fetchRemoteDates(){
+  if(!REMOTE.url) return null;
+  try{
+    const u=REMOTE.url+"?name="+encodeURIComponent(REMOTE.name)+(REMOTE.token?("&token="+encodeURIComponent(REMOTE.token)):"");
+    const res=await fetch(u);
+    const data=await res.json();
+    if(data && data.ok && Array.isArray(data.dates)) return data.dates;
+  }catch(e){}
+  return null;
+}
+
+/* ---- リモート問題文（単語・文・文法）の取得 ---- */
+const QDATA_KEY = STORE_KEY + "_questions";
+
+function validateQuestionData(data){
+  return Array.isArray(data) && data.length===3 &&
+    data.every(level => Array.isArray(level) && level.length>0 &&
+      level.every(it => it && typeof it.en==="string" && it.en.trim() && typeof it.jp==="string" && it.jp.trim()));
+}
+function loadQuestionCache(){
+  try{
+    const raw=localStorage.getItem(QDATA_KEY);
+    if(!raw) return null;
+    const parsed=JSON.parse(raw);
+    if(parsed && validateQuestionData(parsed.data)) return parsed;
+  }catch(e){}
+  return null;
+}
+function saveQuestionCache(data){
+  try{ localStorage.setItem(QDATA_KEY, JSON.stringify({ data, fetchedAt:new Date().toISOString() })); }catch(e){}
+}
+async function fetchRemoteQuestions(){
+  if(!REMOTE.url) return null;
+  try{
+    const u=REMOTE.url+"?action=questions&name="+encodeURIComponent(REMOTE.name)+(REMOTE.token?("&token="+encodeURIComponent(REMOTE.token)):"");
+    const res=await fetch(u);
+    const data=await res.json();
+    if(data && data.ok && validateQuestionData(data.data)) return data;
+  }catch(e){}
+  return null;
+}
+
+/* ============ 要素 ============ */
+const $ = id => document.getElementById(id);
+const startScreen=$("startScreen"), playScreen=$("playScreen"), resultScreen=$("resultScreen");
+const quizScreen=$("quizScreen"), adminScreen=$("adminScreen"), pinModal=$("pinModal");
+const tilesEl=$("tiles"), input=$("typeInput"), jpHint=$("jpHint"), grammarTag=$("grammarTag");
+const scoreVal=$("scoreVal"), comboVal=$("comboVal"), solvedVal=$("solvedVal");
+const timeNum=$("timeNum"), timeFill=$("timeFill");
+const caretHint=$("caretHint"), scorePop=$("scorePop");
+
+/* ============ 音 ============ */
+function initAudio(){ if(!audioCtx){ try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } }
+function beep(freq,dur,type="sine",vol=0.05){
+  if(!soundOn||!audioCtx) return;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type; o.frequency.value=freq;
+  g.gain.setValueAtTime(vol,audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime+dur);
+}
+const sndGood=()=>beep(660,0.06,"triangle",0.04);
+const sndBad =()=>beep(150,0.12,"sawtooth",0.05);
+function sndClear(){ if(!soundOn||!audioCtx)return; [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.14,"triangle",0.05),i*70)); }
+function sndBonus(){ if(!soundOn||!audioCtx)return; [880,1175,1568].forEach((f,i)=>setTimeout(()=>beep(f,0.1,"square",0.035),i*55)); }
+function sndOver(){ if(!soundOn||!audioCtx)return; [440,349,262].forEach((f,i)=>setTimeout(()=>beep(f,0.25,"sine",0.05),i*140)); }
+
+/* ============ 比較ロジック ============ */
+function norm(ch){
+  if(strict) return ch;
+  return ch.toLowerCase().replace(/[’‘´`]/g,"'");
+}
+function charEq(a,b){ return norm(a)===norm(b); }
+
+/* ============ デモタイル（スタート画面）============ */
+function buildDemo(){
+  const d=$("demoTiles"); d.innerHTML="";
+  const states=["done","done","done","active","","",""];
+  "TYPING!".split("").forEach((c,i)=>{
+    const t=document.createElement("div");
+    t.className="tile "+(states[i]||"");
+    t.textContent=c; d.appendChild(t);
+  });
+}
+
+/* ============ ゲーム開始 ============ */
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function startGame(level, fromAdmin){
+  initAudio();
+  adminLaunch=!!fromAdmin;
+  strict=$("strictToggle").checked;
+  curLevel=level;
+  if(level===-1){ queue=shuffle([].concat(...DATA)); }
+  else{ queue=shuffle(DATA[level].slice()); }
+  idx=0; score=0; combo=0; maxCombo=0; solved=0;
+  sessCorrect=0; sessErrors=0; sessChars=0;
+  seenItems=[]; quizList=[]; quizScore=0; quizIdx=0;
+  timeLeft=duration; timerRunning=false; gameOver=false;
+  if(timerId){ clearInterval(timerId); timerId=null; }
+  scoreVal.textContent="0"; comboVal.textContent="0"; solvedVal.textContent="0";
+  renderTime();
+  startScreen.classList.add("hidden"); resultScreen.classList.add("hidden");
+  playScreen.classList.remove("hidden");
+  loadItem();
+}
+
+/* ---- タイマー ---- */
+function renderTime(){
+  const shown=Math.max(0,Math.ceil(timeLeft));
+  timeNum.textContent=shown;
+  timeFill.style.width=Math.max(0,timeLeft/duration*100)+"%";
+  const low=timeLeft<=10;
+  timeNum.classList.toggle("low",low);
+  timeFill.classList.toggle("low",low);
+}
+function startTimer(){
+  if(timerRunning) return;
+  timerRunning=true;
+  playStartMs=performance.now();
+  caretHint.textContent="時間内にどんどん打とう！";
+  timerId=setInterval(()=>{
+    timeLeft-=0.1;
+    if(timeLeft<=0){ timeLeft=0; renderTime(); endGame(); return; }
+    renderTime();
+  },100);
+}
+function addTime(sec){
+  timeLeft=Math.min(duration,timeLeft+sec);
+  renderTime();
+}
+
+function loadItem(){
+  const item=queue[idx];
+  target=item.en;
+  if(!seenItems.some(s=>s.en===item.en)) seenItems.push(item);
+  jpHint.textContent=item.jp;
+  if(item.tag){ grammarTag.textContent=item.tag; grammarTag.classList.remove("hidden"); }
+  else grammarTag.classList.add("hidden");
+  input.value=""; lastTypedLen=0; itemErrors=0; itemStarted=false;
+  if(!timerRunning) caretHint.textContent="タップ→最初の1文字でスタート！";
+  renderTiles("");
+  input.focus();
+}
+
+function renderTiles(val){
+  tilesEl.innerHTML="";
+  // スペースは任意なので、非スペース文字だけを順番に対応させる
+  const typed=[]; for(const ch of val){ if(ch!==" ") typed.push(norm(ch)); }
+  let k=0; // ターゲット側の非スペース文字の通し番号
+  for(let i=0;i<target.length;i++){
+    const ch=target[i];
+    const t=document.createElement("div");
+    if(ch===" "){
+      t.className="tile space";
+      if(k>0 && typed.length>=k) t.classList.add("done"); // 前の単語が終わっていれば光らせる
+      tilesEl.appendChild(t);
+      continue;
+    }
+    t.className="tile";
+    t.textContent=ch;
+    if(k<typed.length){
+      if(typed[k]===norm(ch)) t.classList.add("done");
+      else t.classList.add("bad");
+    } else if(k===typed.length){
+      t.classList.add("active");
+    }
+    tilesEl.appendChild(t);
+    k++;
+  }
+}
+
+/* ============ 入力処理 ============ */
+input.addEventListener("input",()=>{
+  if(gameOver) return;
+  const val=input.value;
+  if(!timerRunning && val.length>0) startTimer();
+  if(!itemStarted){ itemStarted=true; itemStart=performance.now(); }
+
+  // スペースは任意。非スペース文字だけで正誤・完成を判定する
+  const typed=[]; for(const ch of val){ if(ch!==" ") typed.push(ch); }
+  const tgt=[];   for(const ch of target){ if(ch!==" ") tgt.push(ch); }
+
+  // 新しく打った非スペース文字の正誤をカウント（スペース・バックスペースは数えない）
+  if(typed.length>lastTypedLen){
+    const pos=typed.length-1;
+    if(pos<tgt.length && charEq(typed[pos],tgt[pos])) sndGood();
+    else{ itemErrors++; sessErrors++; sndBad(); }
+  }
+  lastTypedLen=typed.length;
+
+  renderTiles(val);
+
+  // 完成判定（スペース無視）
+  if(typed.length===tgt.length && tgt.every((c,i)=>charEq(typed[i],c))){
+    completeItem();
+  }
+});
+
+// タップでどこでも入力にフォーカス
+playScreen.addEventListener("click",e=>{
+  if(e.target.closest(".btn")) return;
+  input.focus();
+});
+
+function completeItem(){
+  const timeMs=performance.now()-itemStart;
+  sessChars+=target.length;
+  sessCorrect+=target.replace(/ /g,"").length;
+  solved++;
+
+  const cps=target.length/(timeMs/1000);   // 1秒あたりの文字数
+  const perfect=itemErrors===0;
+
+  // ボーナスのラベルを組み立て
+  const labels=[];
+
+  // 早打ちボーナス（2段階）
+  let speedBonus=0;
+  if(cps>=5){ speedBonus=60; labels.push("⚡SUPER FAST"); }
+  else if(cps>=3.5){ speedBonus=30; labels.push("⚡FAST"); }
+
+  // ノーミスボーナス（加点＋タイム+1.5秒）
+  let perfectBonus=0, timeRefund=0;
+  if(perfect){ perfectBonus=50; timeRefund=1.5; labels.push("★ノーミス"); combo++; }
+  else { combo=0; }
+  maxCombo=Math.max(maxCombo,combo);
+
+  // 文の長さに応じた基礎点＋コンボ倍率
+  const base=20+target.length*2;
+  const mult=1+Math.min(combo,8)*0.1;
+  const gained=Math.round((base+speedBonus+perfectBonus)*mult);
+  score+=gained;
+
+  if(timeRefund>0) addTime(timeRefund);
+
+  scoreVal.textContent=score;
+  comboVal.textContent=combo;
+  solvedVal.textContent=solved;
+
+  // 演出
+  let txt="+"+gained;
+  if(combo>1) txt+="  ×"+combo;
+  if(timeRefund>0) txt+="  +"+timeRefund+"s";
+  popScore(txt, labels.join("  "));
+  tilesEl.querySelectorAll(".tile").forEach(t=>t.classList.add("pop"));
+  if(perfect||speedBonus>0) sndBonus(); else sndClear();
+
+  // 次の問題へ（尽きたらシャッフルしてループ）
+  setTimeout(()=>{
+    if(gameOver) return;
+    idx++;
+    if(idx>=queue.length){ queue=shuffle(queue); idx=0; }
+    loadItem();
+  },260);
+}
+
+function popScore(txt, sub){
+  scorePop.innerHTML = txt + (sub ? '<div class="pop-sub">'+sub+'</div>' : '');
+  scorePop.classList.remove("go"); void scorePop.offsetWidth; scorePop.classList.add("go");
+}
+
+/* スキップ */
+$("skipBtn").addEventListener("click",()=>{
+  if(gameOver) return;
+  combo=0; comboVal.textContent="0";
+  idx++;
+  if(idx>=queue.length){ queue=shuffle(queue); idx=0; }
+  loadItem();
+});
+$("quitBtn").addEventListener("click",()=>{
+  if(confirm("やめてレベル選択にもどる？")){ stopTimer(); goHome(); }
+});
+function stopTimer(){ if(timerId){ clearInterval(timerId); timerId=null; } timerRunning=false; }
+
+/* ============ 終了 → 記録 → 意味クイズ → 結果 ============ */
+function endGame(){
+  if(gameOver) return;
+  gameOver=true;
+  stopTimer();
+  input.blur();
+  sndOver();
+
+  // 日数・記録をローカル保存 ＋ オンライン記録
+  recordDay();
+  recordDayRemote(fmtDate(new Date()));
+  store.totalSolved += solved;
+  if(score>store.bestScore) store.bestScore=score;
+  // モードを次へ進める（1つクリアするたびに 単語→文章→文法→…）。親のテスト起動では進めない
+  if(!adminLaunch && curLevel>=0 && curLevel<=2){
+    store.modeIndex=(curLevel+1)%3;
+  }
+  saveStore();
+
+  playScreen.classList.add("hidden");
+  if(seenItems.length>0) startQuiz();
+  else showResults();
+}
+
+/* ---- 意味クイズ（英語→意味を4択） ---- */
+function pickDistractors(item, pool, n){
+  const out=[];
+  const cands=shuffle(pool.filter(x=>x.jp!==item.jp && x.en!==item.en));
+  for(const c of cands){ if(out.length>=n) break; if(!out.some(o=>o.jp===c.jp)) out.push(c); }
+  return out;
+}
+function startQuiz(){
+  const seen=shuffle(seenItems.slice()).slice(0,5);
+  quizList=seen.map(item=>{
+    let pool=DATA.find(lv=>lv.some(x=>x.en===item.en)) || [].concat(...DATA);
+    let dis=pickDistractors(item, pool, 3);
+    if(dis.length<3) dis=dis.concat(pickDistractors(item, [].concat(...DATA), 3-dis.length));
+    const options=shuffle([item, ...dis.slice(0,3)]).map(o=>o.jp);
+    return { en:item.en, answer:item.jp, options };
+  });
+  quizIdx=0; quizScore=0;
+  quizScreen.classList.remove("hidden");
+  renderQuiz();
+}
+function renderQuiz(){
+  const q=quizList[quizIdx];
+  $("quizWord").textContent=q.en;
+  $("quizProg").textContent=(quizIdx+1)+" / "+quizList.length+" 問";
+  const box=$("quizOpts"); box.innerHTML="";
+  q.options.forEach(opt=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.textContent=opt;
+    b.addEventListener("click",()=>answerQuiz(b,opt,q));
+    box.appendChild(b);
+  });
+}
+function answerQuiz(btn, chosen, q){
+  $("quizOpts").querySelectorAll(".opt").forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===q.answer) b.classList.add("correct");
+  });
+  if(chosen===q.answer){ quizScore++; sndBonus(); }
+  else{ btn.classList.add("wrong"); sndBad(); }
+  setTimeout(()=>{
+    quizIdx++;
+    if(quizIdx>=quizList.length){ finishQuiz(); }
+    else renderQuiz();
+  },850);
+}
+function finishQuiz(){
+  store.quizCorrect += quizScore;
+  store.quizTotal += quizList.length;
+  saveStore();
+  quizScreen.classList.add("hidden");
+  showResults();
+}
+
+/* ---- 結果表示 ---- */
+function showResults(){
+  const totalKeys=sessCorrect+sessErrors;
+  const acc=totalKeys>0?Math.round(sessCorrect/totalKeys*100):100;
+  const elapsedMin=Math.max(0.001,(performance.now()-playStartMs)/1000/60);
+  const wpm=Math.round((sessChars/5)/elapsedMin);
+
+  resultScreen.classList.remove("hidden");
+  $("rScore").textContent=score;
+  $("rSolved").innerHTML=solved+'<small> 問</small>';
+  $("rAcc").innerHTML=acc+'<small>%</small>';
+  $("rWpm").innerHTML=wpm+'<small> wpm</small>';
+  $("rQuiz").innerHTML = quizList.length>0 ? (quizScore+'<small> / '+quizList.length+' 正解</small>') : '—';
+
+  const per=solved/(duration/60);
+  let starN = per>=12?3 : per>=6?2 : 1;
+  let s="";
+  for(let i=0;i<3;i++) s+= i<starN?'<span class="star-on">★</span>':'<span class="star-off">★</span>';
+  $("stars").innerHTML=s;
+
+  $("resultTitle").textContent="タイムアップ！";
+  let msg;
+  if(starN===3 && acc>=95) msg="速さも正確さも文句なし！すごい🏆";
+  else if(starN===3) msg="かなりの速さ！次は正確さも狙おう⚡";
+  else if(acc>=95) msg="ノーミスが光る！スピードを上げていこう✨";
+  else if(solved>0) msg="いいペース！もう一回で記録更新だ🔥";
+  else msg="まずは1問。あせらず正確に打ってみよう💪";
+  $("resultMsg").textContent=msg;
+}
+
+/* ============ ナビ ============ */
+function renderNextMode(){
+  const mi=store.modeIndex||0;
+  const m=MODES[mi];
+  $("nmName").textContent=m.name;
+  $("nmDesc").textContent=m.desc;
+  const track=$("nmTrack"); track.innerHTML="";
+  MODES.forEach((mm,i)=>{
+    const s=document.createElement("span");
+    s.className="nm-step"+(i===mi?" cur":"");
+    s.textContent=(i+1)+" "+mm.name;
+    track.appendChild(s);
+    if(i<MODES.length-1){ const a=document.createElement("span"); a.className="nm-arrow"; a.textContent="▸"; track.appendChild(a); }
+  });
+}
+function goHome(){
+  stopTimer();
+  playScreen.classList.add("hidden");
+  resultScreen.classList.add("hidden");
+  quizScreen.classList.add("hidden");
+  adminScreen.classList.add("hidden");
+  renderNextMode();
+  startScreen.classList.remove("hidden");
+}
+$("homeBtn").addEventListener("click",goHome);
+$("againBtn").addEventListener("click",()=>startGame(curLevel,false));
+$("startBtn").addEventListener("click",()=>startGame(MODES[store.modeIndex||0].level, false));
+
+// 親用：モードを選んで練習（進行に影響しない）
+document.querySelectorAll(".mode-pick button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    adminScreen.classList.add("hidden");
+    startGame(parseInt(b.dataset.level,10), true);
+  });
+});
+
+/* ============ 管理画面（おうちの人用） ============ */
+let pinMode="enter";
+function openAdmin(){ showPinModal(store.pin ? "enter" : "set"); }
+function showPinModal(mode){
+  pinMode=mode;
+  $("pinTitle").textContent = mode==="enter" ? "PINを入力" : (mode==="change" ? "新しいPIN" : "PINを設定");
+  $("pinDesc").textContent = mode==="enter" ? "おうちの人用のPIN（4桁）を入力してください"
+                           : "4桁の数字をきめてください（お子さんに教えないでね）";
+  $("pinInput").value=""; $("pinErr").textContent="";
+  pinModal.classList.remove("hidden");
+  setTimeout(()=>$("pinInput").focus(),60);
+}
+function closePin(){ pinModal.classList.add("hidden"); }
+$("pinCancel").addEventListener("click",closePin);
+$("pinOk").addEventListener("click",()=>{
+  const v=$("pinInput").value.trim();
+  if(!/^\d{4}$/.test(v)){ $("pinErr").textContent="4桁の数字で入力してね"; return; }
+  if(pinMode==="enter"){
+    if(v===store.pin){ closePin(); openAdminScreen(); }
+    else $("pinErr").textContent="PINがちがいます";
+  } else { // set or change
+    store.pin=v; saveStore(); closePin();
+    if(pinMode==="set") openAdminScreen(); else alert("PINを変えました");
+  }
+});
+let currentDays=0;
+function openAdminScreen(){
+  startScreen.classList.add("hidden");
+  adminScreen.classList.remove("hidden");
+  paintAdmin(store.playedDates, REMOTE.url ? "syncing" : "local");   // まずローカルを即表示
+  paintQDataStatus();
+  if(REMOTE.url){
+    fetchRemoteDates().then(dates=>{
+      if(dates){
+        const merged=Array.from(new Set([...dates, ...store.playedDates])); // 取りこぼし防止でマージ
+        paintAdmin(merged, "online");
+      }else{
+        paintAdmin(store.playedDates, "offline");
+      }
+    });
+  }
+}
+function paintQDataStatus(){
+  const c=loadQuestionCache();
+  $("admQDataAt").textContent = c ? new Date(c.fetchedAt).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "未取得";
+}
+function paintAdmin(dates, status){
+  currentDays=dates.length;
+  $("admDays").innerHTML=currentDays+'<small> 日</small>';
+  $("admYen").value = store.perDayYen || "";
+  updateTotal();
+  $("admStreak").textContent=calcStreak(dates)+"日";
+  $("admQuiz").textContent = store.quizTotal>0 ? Math.round(store.quizCorrect/store.quizTotal*100)+"%" : "—";
+  const ul=$("admDates"); ul.innerHTML="";
+  const recent=dates.slice().sort().reverse().slice(0,14);
+  if(recent.length===0){ ul.innerHTML='<li style="background:none;border:none;color:#8A8FC7;">まだ記録がありません</li>'; }
+  recent.forEach(d=>{ const li=document.createElement("li"); li.textContent=String(d).slice(5).replace("-","/"); ul.appendChild(li); });
+  let note;
+  if(!REMOTE.url) note = storageOK ? "※ この端末に保存（ローカルのみ）。日付の変更による水増しは防げません。"
+                                   : "※ プレビューでは保存できません。スマホで開くと記録されます。";
+  else if(status==="syncing") note = "…スプレッドシートと同期中…";
+  else if(status==="online")  note = "✔ スプレッドシートと同期。おうちの人のスマホからも見られます。";
+  else note = "⚠ いまはオフライン表示（ローカル）。ネットにつながると自動で同期します。";
+  $("admNote").textContent=note;
+}
+function updateTotal(){
+  const yen=parseInt($("admYen").value,10)||0;
+  $("admTotal").textContent="¥"+(yen*currentDays).toLocaleString();
+}
+$("admYen").addEventListener("input",()=>{ store.perDayYen=parseInt($("admYen").value,10)||0; saveStore(); updateTotal(); });
+$("admBack").addEventListener("click",()=>{ adminScreen.classList.add("hidden"); startScreen.classList.remove("hidden"); });
+$("admChangePin").addEventListener("click",()=>showPinModal("change"));
+$("openAdminBtn").addEventListener("click",openAdmin);
+$("admRefreshBtn").addEventListener("click", async ()=>{
+  const btn=$("admRefreshBtn");
+  btn.disabled=true; btn.textContent="更新中…";
+  const fresh=await fetchRemoteQuestions();
+  if(fresh){
+    DATA=fresh.data; saveQuestionCache(fresh.data);
+    paintQDataStatus();
+    alert("最新の問題に更新しました");
+  }else{
+    alert("更新できませんでした。ネット接続を確認してください。");
+  }
+  btn.disabled=false; btn.textContent="⟳ 最新にする";
+});
+
+$("muteBtn").addEventListener("click",()=>{
+  soundOn=!soundOn;
+  $("muteBtn").textContent=soundOn?"🔊":"🔇";
+});
+
+$("durSeg").querySelectorAll("button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    $("durSeg").querySelectorAll("button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    duration=parseInt(b.dataset.dur,10);
+  });
+});
+
+/* ============ 起動フロー ============ */
+function showLoadScreen(state){
+  $("loadScreen").classList.remove("hidden");
+  if(state==="loading"){
+    $("loadTitle").textContent="問題を読み込み中…";
+    $("loadMsg").textContent="スプレッドシートから最新の問題を取得しています";
+    $("loadRetryBtn").classList.add("hidden");
+  } else { // error
+    $("loadTitle").textContent="問題を読み込めませんでした";
+    $("loadMsg").textContent = REMOTE.url
+      ? "インターネット接続を確認して、もう一度試してください。"
+      : "スプレッドシートの設定が必要です（setup-guide.md を参照）。";
+    $("loadRetryBtn").classList.remove("hidden");
+  }
+}
+function onDataReady(){
+  $("loadScreen").classList.add("hidden");
+  renderNextMode();
+  buildDemo();
+  startScreen.classList.remove("hidden");
+}
+async function attemptFetchAndEnter(){
+  const fresh=await fetchRemoteQuestions();
+  if(fresh){
+    DATA=fresh.data; saveQuestionCache(fresh.data);
+    onDataReady();
+  } else {
+    showLoadScreen("error");
+  }
+}
+async function refreshQuestionsInBackground(){
+  const fresh=await fetchRemoteQuestions();
+  if(fresh){ DATA=fresh.data; saveQuestionCache(fresh.data); }
+}
+$("loadRetryBtn").addEventListener("click", attemptFetchAndEnter);
+
+function boot(){
+  loadStore();
+  const cached=loadQuestionCache();
+  if(cached){
+    DATA=cached.data;
+    onDataReady();
+    refreshQuestionsInBackground();
+  } else {
+    showLoadScreen("loading");
+    attemptFetchAndEnter();
+  }
+}
+boot();
+</script>
+</body>
+</html>
