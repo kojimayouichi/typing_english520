@@ -260,8 +260,45 @@
 
   .hidden{display:none !important;}
 
+  /* ---------- 演出：パーティクル・発光 ---------- */
+  #fxLayer{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden;}
+  .particle{position:fixed;border-radius:50%;pointer-events:none;will-change:transform,opacity;
+    animation:particleFly var(--dur,600ms) cubic-bezier(.15,.7,.3,1) forwards;}
+  @keyframes particleFly{
+    0%{transform:translate(0,0) scale(1);opacity:1;}
+    100%{transform:translate(var(--tx),var(--ty)) scale(.2);opacity:0;}
+  }
+  #flashOverlay{position:fixed;inset:0;pointer-events:none;z-index:55;background:var(--flash-color,#fff);opacity:0;}
+  #flashOverlay.go{animation:flashPulse 380ms ease-out forwards;}
+  @keyframes flashPulse{0%{opacity:.22;}100%{opacity:0;}}
+
+  .tile.spark{animation:tileSpark 260ms ease-out;}
+  @keyframes tileSpark{
+    0%{box-shadow:0 0 0 0 rgba(74,222,158,.7);}
+    60%{box-shadow:0 0 14px 4px rgba(74,222,158,.5);}
+    100%{box-shadow:0 0 0 0 rgba(74,222,158,0);}
+  }
+
+  .tiles.hot1{box-shadow:0 0 0 1px rgba(124,111,240,.25);border-radius:14px;}
+  .tiles.hot2{box-shadow:0 0 22px 2px rgba(255,203,71,.28);border-radius:14px;}
+  .tiles.hot3{box-shadow:0 0 32px 6px rgba(255,203,71,.4);border-radius:14px;animation:hotPulse 900ms ease-in-out infinite;}
+  @keyframes hotPulse{0%,100%{box-shadow:0 0 32px 6px rgba(255,203,71,.4);}50%{box-shadow:0 0 40px 10px rgba(255,203,71,.6);}}
+
+  #comboBanner{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%) scale(.5);
+    font-family:"Space Grotesk";font-weight:700;font-size:34px;color:var(--active);
+    text-shadow:0 0 22px rgba(255,203,71,.7);opacity:0;pointer-events:none;z-index:61;
+    letter-spacing:.02em;white-space:nowrap;}
+  #comboBanner.go{animation:comboPop 700ms cubic-bezier(.2,.8,.3,1.2) forwards;}
+  @keyframes comboPop{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-4deg);}
+    30%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(2deg);}
+    70%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0);}
+    100%{opacity:0;transform:translate(-50%,-62%) scale(.95) rotate(0);}
+  }
+
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important;transition:none !important;}
+    .particle,#flashOverlay,.tiles.hot1,.tiles.hot2,.tiles.hot3,#comboBanner{display:none !important;}
   }
   @media (max-width:360px){
     .tile{font-size:20px;min-width:23px;height:38px;}
@@ -433,6 +470,9 @@
 </div>
 
 <div id="scorePop"></div>
+<div id="fxLayer"></div>
+<div id="flashOverlay"></div>
+<div id="comboBanner"></div>
 
 <!-- PIN modal -->
 <div class="modal-bg hidden" id="pinModal">
@@ -510,12 +550,12 @@ function calcStreak(dates){
 }
 
 /* ---- オンライン記録（スプレッドシート）---- */
-function recordDayRemote(dateStr){
+function recordDayRemote(dateStr, finalScore){
   if(!REMOTE.url) return;
   fetch(REMOTE.url, {
     method:"POST",
     headers:{ "Content-Type":"text/plain;charset=utf-8" }, // 簡易リクエストにしてCORSプリフライトを避ける
-    body: JSON.stringify({ date:dateStr, name:REMOTE.name, token:REMOTE.token })
+    body: JSON.stringify({ date:dateStr, name:REMOTE.name, token:REMOTE.token, score:finalScore })
   }).catch(()=>{});   // 失敗してもローカルには保存済みなので無視
 }
 async function fetchRemoteDates(){
@@ -568,6 +608,54 @@ const tilesEl=$("tiles"), input=$("typeInput"), jpHint=$("jpHint"), grammarTag=$
 const scoreVal=$("scoreVal"), comboVal=$("comboVal"), solvedVal=$("solvedVal");
 const timeNum=$("timeNum"), timeFill=$("timeFill");
 const caretHint=$("caretHint"), scorePop=$("scorePop");
+const fxLayer=$("fxLayer"), flashOverlay=$("flashOverlay"), comboBanner=$("comboBanner");
+
+/* ============ 演出エンジン（軽量パーティクル） ============ */
+const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function spawnParticles(x, y, opts){
+  if(reduceMotion) return;
+  const o=Object.assign({count:10,colors:["#4ADE9E","#57C7FF"],size:7,spread:70,duration:600},opts||{});
+  for(let i=0;i<o.count;i++){
+    const p=document.createElement("div");
+    p.className="particle";
+    const ang=Math.random()*Math.PI*2;
+    const dist=o.spread*(0.4+Math.random()*0.7);
+    const tx=Math.cos(ang)*dist, ty=Math.sin(ang)*dist - o.spread*0.15; // 少し上向きに
+    const size=o.size*(0.6+Math.random()*0.8);
+    p.style.left=x+"px"; p.style.top=y+"px";
+    p.style.width=size+"px"; p.style.height=size+"px";
+    p.style.marginLeft=(-size/2)+"px"; p.style.marginTop=(-size/2)+"px";
+    p.style.background=o.colors[Math.floor(Math.random()*o.colors.length)];
+    p.style.setProperty("--tx",tx+"px");
+    p.style.setProperty("--ty",ty+"px");
+    p.style.setProperty("--dur",(o.duration*(0.8+Math.random()*0.4))+"ms");
+    fxLayer.appendChild(p);
+    setTimeout(()=>p.remove(), o.duration+150);
+  }
+}
+function flashScreen(color){
+  if(reduceMotion) return;
+  flashOverlay.style.setProperty("--flash-color", color||"#ffffff");
+  flashOverlay.classList.remove("go"); void flashOverlay.offsetWidth; flashOverlay.classList.add("go");
+}
+function showComboBanner(text){
+  if(reduceMotion) return;
+  comboBanner.textContent=text;
+  comboBanner.classList.remove("go"); void comboBanner.offsetWidth; comboBanner.classList.add("go");
+}
+// 中央基準でパーティクルを出す（要素の中心座標を取得）
+function burstAt(el, opts){
+  const r=el.getBoundingClientRect();
+  spawnParticles(r.left+r.width/2, r.top+r.height/2, opts);
+}
+// コンボの熱量を見た目に反映（タイル周りの発光）
+function updateComboHeat(combo){
+  tilesEl.classList.remove("hot1","hot2","hot3");
+  if(combo>=8) tilesEl.classList.add("hot3");
+  else if(combo>=5) tilesEl.classList.add("hot2");
+  else if(combo>=2) tilesEl.classList.add("hot1");
+}
 
 /* ============ 音 ============ */
 function initAudio(){ if(!audioCtx){ try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } }
@@ -620,6 +708,7 @@ function startGame(level, fromAdmin){
   timeLeft=duration; timerRunning=false; gameOver=false;
   if(timerId){ clearInterval(timerId); timerId=null; }
   scoreVal.textContent="0"; comboVal.textContent="0"; solvedVal.textContent="0";
+  tilesEl.classList.remove("hot1","hot2","hot3");
   renderTime();
   startScreen.classList.add("hidden"); resultScreen.classList.add("hidden");
   playScreen.classList.remove("hidden");
@@ -703,14 +792,26 @@ input.addEventListener("input",()=>{
   const tgt=[];   for(const ch of target){ if(ch!==" ") tgt.push(ch); }
 
   // 新しく打った非スペース文字の正誤をカウント（スペース・バックスペースは数えない）
+  let justCorrect=false;
   if(typed.length>lastTypedLen){
     const pos=typed.length-1;
-    if(pos<tgt.length && charEq(typed[pos],tgt[pos])) sndGood();
+    if(pos<tgt.length && charEq(typed[pos],tgt[pos])){ sndGood(); justCorrect=true; }
     else{ itemErrors++; sessErrors++; sndBad(); }
   }
   lastTypedLen=typed.length;
 
   renderTiles(val);
+
+  // 正解を打つたびに、その文字タイルを小さく発光させる
+  if(justCorrect){
+    const doneTiles=tilesEl.querySelectorAll(".tile.done");
+    const t=doneTiles[doneTiles.length-1];
+    if(t){
+      t.classList.remove("spark"); void t.offsetWidth; t.classList.add("spark");
+      const r=t.getBoundingClientRect();
+      spawnParticles(r.left+r.width/2, r.top+r.height/2, {count:3, colors:["#4ADE9E","#8CF5C6"], size:5, spread:26, duration:340});
+    }
+  }
 
   // 完成判定（スペース無視）
   if(typed.length===tgt.length && tgt.every((c,i)=>charEq(typed[i],c))){
@@ -758,6 +859,7 @@ function completeItem(){
   scoreVal.textContent=score;
   comboVal.textContent=combo;
   solvedVal.textContent=solved;
+  updateComboHeat(combo);
 
   // 演出
   let txt="+"+gained;
@@ -766,6 +868,17 @@ function completeItem(){
   popScore(txt, labels.join("  "));
   tilesEl.querySelectorAll(".tile").forEach(t=>t.classList.add("pop"));
   if(perfect||speedBonus>0) sndBonus(); else sndClear();
+
+  // 完成時の発光バースト（内容に応じて色・量・派手さを変える）
+  const fxColors = speedBonus>0 ? ["#FFCB47","#FF9F45","#57C7FF"] : (perfect ? ["#4ADE9E","#57C7FF","#FFCB47"] : ["#7C6FF0","#57C7FF"]);
+  burstAt(tilesEl, { count: perfect||speedBonus>0 ? 22 : 14, colors:fxColors, size:8, spread: speedBonus>=60?110:80, duration:650 });
+  if(perfect) flashScreen("rgba(74,222,158,0.9)");
+  else if(speedBonus>0) flashScreen("rgba(255,203,71,0.9)");
+
+  // コンボの節目でバナー演出
+  if(combo===3) showComboBanner("🔥 COMBO ×3!");
+  else if(combo===5) showComboBanner("⚡ COMBO ×5!!");
+  else if(combo>=8 && combo%4===0) showComboBanner("🌟 COMBO ×"+combo+"!!!");
 
   // 次の問題へ（尽きたらシャッフルしてループ）
   setTimeout(()=>{
@@ -785,6 +898,7 @@ function popScore(txt, sub){
 $("skipBtn").addEventListener("click",()=>{
   if(gameOver) return;
   combo=0; comboVal.textContent="0";
+  updateComboHeat(0);
   idx++;
   if(idx>=queue.length){ queue=shuffle(queue); idx=0; }
   loadItem();
@@ -804,7 +918,7 @@ function endGame(){
 
   // 日数・記録をローカル保存 ＋ オンライン記録
   recordDay();
-  recordDayRemote(fmtDate(new Date()));
+  recordDayRemote(fmtDate(new Date()), score);
   store.totalSolved += solved;
   if(score>store.bestScore) store.bestScore=score;
   // モードを次へ進める（1つクリアするたびに 単語→文章→文法→…）。親のテスト起動では進めない
@@ -855,7 +969,10 @@ function answerQuiz(btn, chosen, q){
     b.disabled=true;
     if(b.textContent===q.answer) b.classList.add("correct");
   });
-  if(chosen===q.answer){ quizScore++; sndBonus(); }
+  if(chosen===q.answer){
+    quizScore++; sndBonus();
+    burstAt(btn, {count:14, colors:["#4ADE9E","#57C7FF","#FFCB47"], size:7, spread:70, duration:550});
+  }
   else{ btn.classList.add("wrong"); sndBad(); }
   setTimeout(()=>{
     quizIdx++;
@@ -899,6 +1016,19 @@ function showResults(){
   else if(solved>0) msg="いいペース！もう一回で記録更新だ🔥";
   else msg="まずは1問。あせらず正確に打ってみよう💪";
   $("resultMsg").textContent=msg;
+
+  // 3つ星なら結果画面でも軽く花火演出
+  if(starN===3 && !reduceMotion){
+    const starsEl=$("stars");
+    const colors=["#FFCB47","#4ADE9E","#57C7FF","#FF6B8A"];
+    [0,180,380].forEach(delay=>{
+      setTimeout(()=>{
+        const r=starsEl.getBoundingClientRect();
+        const x=r.left+Math.random()*r.width, y=r.top+r.height/2;
+        spawnParticles(x,y,{count:16,colors,size:8,spread:90,duration:700});
+      },delay);
+    });
+  }
 }
 
 /* ============ ナビ ============ */
