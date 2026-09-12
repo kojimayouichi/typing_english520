@@ -563,6 +563,14 @@ function recordDayRemote(dateStr, finalScore, mode){
     body: JSON.stringify({ date:dateStr, name:REMOTE.name, token:REMOTE.token, score:finalScore, mode:mode })
   }).catch(()=>{});   // 失敗してもローカルには保存済みなので無視
 }
+function recordQuizRemote(dateStr, quizCorrect, quizTotal){
+  if(!REMOTE.url) return;
+  fetch(REMOTE.url, {
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body: JSON.stringify({ date:dateStr, name:REMOTE.name, token:REMOTE.token, quizCorrect:quizCorrect, quizTotal:quizTotal })
+  }).catch(()=>{});
+}
 async function fetchRemoteDates(){
   if(!REMOTE.url) return null;
   try{
@@ -989,6 +997,7 @@ function finishQuiz(){
   store.quizCorrect += quizScore;
   store.quizTotal += quizList.length;
   saveStore();
+  recordQuizRemote(fmtDate(new Date()), quizScore, quizList.length);
   quizScreen.classList.add("hidden");
   showResults();
 }
