@@ -550,12 +550,17 @@ function calcStreak(dates){
 }
 
 /* ---- オンライン記録（スプレッドシート）---- */
-function recordDayRemote(dateStr, finalScore){
+function modeLabel(level){
+  if(level===-1) return "ぜんぶ";
+  const m=MODES.find(mm=>mm.level===level);
+  return m ? m.name : "";
+}
+function recordDayRemote(dateStr, finalScore, mode){
   if(!REMOTE.url) return;
   fetch(REMOTE.url, {
     method:"POST",
     headers:{ "Content-Type":"text/plain;charset=utf-8" }, // 簡易リクエストにしてCORSプリフライトを避ける
-    body: JSON.stringify({ date:dateStr, name:REMOTE.name, token:REMOTE.token, score:finalScore })
+    body: JSON.stringify({ date:dateStr, name:REMOTE.name, token:REMOTE.token, score:finalScore, mode:mode })
   }).catch(()=>{});   // 失敗してもローカルには保存済みなので無視
 }
 async function fetchRemoteDates(){
@@ -918,7 +923,7 @@ function endGame(){
 
   // 日数・記録をローカル保存 ＋ オンライン記録
   recordDay();
-  recordDayRemote(fmtDate(new Date()), score);
+  recordDayRemote(fmtDate(new Date()), score, modeLabel(curLevel));
   store.totalSolved += solved;
   if(score>store.bestScore) store.bestScore=score;
   // モードを次へ進める（1つクリアするたびに 単語→文章→文法→…）。親のテスト起動では進めない
